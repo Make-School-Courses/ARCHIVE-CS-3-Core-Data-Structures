@@ -17,12 +17,51 @@ def decode(digits, base):
     return: int -- integer representation of number (in base 10)"""
     # Handle up to base 36 [0-9a-z]
     assert 2 <= base <= 36, 'base is out of range: {}'.format(base)
-    # TODO: Decode digits from binary (base 2)
-    # ...
-    # TODO: Decode digits from hexadecimal (base 16)
-    # ...
-    # TODO: Decode digits from any base (2 up to 36)
-    # ...
+    # List of characters to represent digits up to base 36 [0-9a-z]
+    characters = string.digits + string.ascii_lowercase
+
+    # Solution 1: Start decoding rightmost digit and count powers up
+    number1 = 0
+    for power, digit in enumerate(reversed(digits)):
+        # Decode next rightmost digit into a number
+        assert digit in characters, 'no character for digit: {}'.format(digit)
+        digit_value = characters.index(digit)
+        assert 0 <= digit_value < base
+        # Add this digit value times this power of base
+        number1 += digit_value * (base ** power)
+
+    # Solution 2: Start decoding leftmost digit and count powers down
+    number2 = 0
+    max_power = len(digits) - 1
+    for iteration, digit in enumerate(digits):
+        # Decode next leftmost digit into a number
+        assert digit in characters, 'no character for digit: {}'.format(digit)
+        digit_value = characters.index(digit)
+        assert 0 <= digit_value < base
+        # Calculate actual power of base
+        power = max_power - iteration
+        # Add this digit value times this power of base
+        number2 += digit_value * (base ** power)
+
+    # Solution 3: Start decoding leftmost digit and shift number left
+    number3 = 0
+    for digit in digits:
+        # Decode next leftmost digit into a number
+        digit_value = characters.index(digit)
+        assert 0 <= digit_value < base
+        # Shift number left one power of base
+        number3 *= base
+        # Now add this digit value
+        number3 += digit_value
+        # Equivalently, in one expression:
+        # number3 = (number3 * base) + digit_value
+
+    # Solution 4: Cast string to int type (cheating)
+    number4 = int(digits, base)
+    assert number1 == number2
+    assert number2 == number3
+    assert number3 == number4
+    return number3
 
 
 def encode(number, base):
@@ -34,12 +73,55 @@ def encode(number, base):
     assert 2 <= base <= 36, 'base is out of range: {}'.format(base)
     # Handle unsigned numbers only for now
     assert number >= 0, 'number is negative: {}'.format(number)
-    # TODO: Encode number in binary (base 2)
-    # ...
-    # TODO: Encode number in hexadecimal (base 16)
-    # ...
-    # TODO: Encode number in any base (2 up to 36)
-    # ...
+    # Handle zero as special case to avoid returning empty string
+    if number == 0:
+        return '0'
+    # List of characters to represent digits up to base 36 [0-9a-z]
+    characters = string.digits + string.ascii_lowercase
+
+    # Solution 1: Start encoding leftmost digit and count powers down
+    digits1 = ''
+    # Find the maximum base power for leftmost digit
+    max_power = 0
+    while base ** max_power < number:
+        max_power += 1
+    remainder = number
+    # Loop base powers from max_power down to 0
+    for power in range(max_power, -1, -1):
+        # Get value of next leftmost digit
+        # (Calculate how many multiples of this base power we need)
+        digit_value = remainder // (base ** power)
+        assert 0 <= digit_value < base
+        # Get character to represent next leftmost digit
+        character = characters[digit_value]
+        # Append next digit onto right side of previous digits
+        digits1 = digits1 + character
+        # Subtract/modulus off value of completed digit
+        # remainder -= digit_value * (base ** power)
+        remainder = remainder % (base ** power)
+        # Equivalently, in one function call:
+        # digit_value, remainder = divmod(remainder, base ** power)
+    # Strip any leading zeros from the result
+    digits1 = digits1.lstrip('0')
+
+    # Solution 2: Start encoding rightmost digit and shift number right
+    digits2 = ''
+    # Loop until we shift number all the way to the right
+    quotient = number
+    while quotient > 0:
+        # Get value of next rightmost digit in base range
+        digit_value = quotient % base
+        assert 0 <= digit_value < base
+        # Get character to represent next rightmost digit
+        character = characters[digit_value]
+        # Prepend next digit onto left side of previous digits
+        digits2 = character + digits2
+        # Divide by base to shift off value of completed digit
+        quotient = quotient // base
+        # Equivalently, in one function call:
+        # quotient, digit_value = divmod(quotient, base)
+    assert digits1 == digits2
+    return digits2
 
 
 def convert(digits, base1, base2):
@@ -51,14 +133,11 @@ def convert(digits, base1, base2):
     # Handle up to base 36 [0-9a-z]
     assert 2 <= base1 <= 36, 'base1 is out of range: {}'.format(base1)
     assert 2 <= base2 <= 36, 'base2 is out of range: {}'.format(base2)
-    # TODO: Convert digits from base 2 to base 16 (and vice versa)
-    # ...
-    # TODO: Convert digits from base 2 to base 10 (and vice versa)
-    # ...
-    # TODO: Convert digits from base 10 to base 16 (and vice versa)
-    # ...
-    # TODO: Convert digits from any base to any base (2 up to 36)
-    # ...
+    # Solution: This is much easier than you think...
+    # First, decode the digits in base1 into a number
+    number = decode(digits, base1)
+    # Then, encode the number into digits in base2
+    return encode(number, base2)
 
 
 def main():

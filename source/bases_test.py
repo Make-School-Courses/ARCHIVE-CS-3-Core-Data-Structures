@@ -1,7 +1,19 @@
 #!python
 
+from bases import char_for_value, value_of_char, BASE_36_CHARS
 from bases import decode, encode, convert
 import unittest
+
+
+class BasesUtilsTest(unittest.TestCase):
+
+    def test_char_for_value(self):
+        for index, char in enumerate(BASE_36_CHARS):
+            assert char_for_value(index) == char
+
+    def test_value_of_char(self):
+        for index, char in enumerate(BASE_36_CHARS):
+            assert value_of_char(char) == index
 
 
 class BasesDecodeTest(unittest.TestCase):

@@ -9,6 +9,32 @@ import string
 # string.ascii_letters is ascii_lowercase + ascii_uppercase
 # string.printable is digits + ascii_letters + punctuation + whitespace
 
+# Characters to represent digits up to base 36 [0-9a-z]
+BASE_36_CHARS = string.digits + string.ascii_lowercase
+# Dictionary of character-to-value mappings for fast (constant-time) lookup
+BASE_36_CHAR_MAP = {char: index for index, char in enumerate(BASE_36_CHARS)}
+# Immutable set of uppercase characters for fast (constant-time) lookup
+UPPERCASE_CHARS = frozenset(char for char in string.ascii_uppercase)
+
+
+def char_for_value(value):
+    """Return character to represent digit with given numerical value."""
+    assert 0 <= value < 36, 'digit value out of range (0-35): {}'.format(value)
+    # This is fast due to constant-time lookup by string index
+    return BASE_36_CHARS[value]
+
+
+def value_of_char(digit):
+    """Return numerical value represented by given digit character."""
+    # Handle uppercase letters [A-Z] by lowercasing them
+    if digit in UPPERCASE_CHARS:
+        digit = digit.lower()
+    assert digit in BASE_36_CHAR_MAP, 'unknown digit value: {}'.format(digit)
+    # This works but is slow due to linear search through string of characters
+    # return BASE_36_CHARS.index(digit)  # Worst case O(base) time
+    # This is faster due to constant-time lookup in dictionary using hashing
+    return BASE_36_CHAR_MAP[digit]
+
 
 def decode(digits, base):
     """Decode given digits in given base to number in base 10.

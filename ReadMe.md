@@ -1,4 +1,6 @@
-# CS 3: Core Data Structures & Algorithms
+# ARCHIVE - CS 3: Core Data Structures & Algorithms
+
+## NOTE: This repo is no longer maintained      
 
 ## Course Schedule
 
